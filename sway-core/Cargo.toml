@@ -49,9 +49,11 @@ thiserror = "1.0"
 tracing = "0.1"
 uint = "0.9"
 vec1 = "1.8.0"
+profiler-types = { git = "https://github.com/ourovoros-io/sway-perf.git",  optional = true}
 
-[target.'cfg(not(target_os = "macos"))'.dependencies]
-sysinfo = "0.29.0"
 
 [lints.clippy]
 iter_over_hash_type = "deny"
+
+[features]
+profile = ["dep:profiler-types"]

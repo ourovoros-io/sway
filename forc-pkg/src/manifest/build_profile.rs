@@ -30,6 +30,8 @@ pub struct BuildProfile {
     #[serde(default)]
     pub time_phases: bool,
     #[serde(default)]
+    pub profile_phases: bool,
+    #[serde(default)]
     pub metrics_outfile: Option<String>,
     #[serde(default)]
     pub include_tests: bool,
@@ -62,6 +64,7 @@ impl BuildProfile {
             print_bytecode_spans: false,
             terse: false,
             time_phases: false,
+            profile_phases: false,
             metrics_outfile: None,
             include_tests: false,
             json_abi_with_callpaths: false,
@@ -86,6 +89,7 @@ impl BuildProfile {
             print_bytecode_spans: false,
             terse: false,
             time_phases: false,
+            profile_phases: false,
             metrics_outfile: None,
             include_tests: false,
             json_abi_with_callpaths: false,
@@ -159,6 +163,7 @@ mod tests {
             print_bytecode_spans: false,
             terse: true,
             time_phases: true,
+            profile_phases: true,
             metrics_outfile: Some("metrics_outfile".into()),
             include_tests: true,
             json_abi_with_callpaths: true,

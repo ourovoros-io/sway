@@ -192,6 +192,7 @@ pub struct BuildConfig {
     pub(crate) include_tests: bool,
     pub(crate) optimization_level: OptLevel,
     pub time_phases: bool,
+    pub profile_phases: bool,
     pub metrics_outfile: Option<String>,
     pub experimental: ExperimentalFlags,
     pub lsp_mode: Option<LspConfig>,
@@ -239,6 +240,7 @@ impl BuildConfig {
             print_ir: PrintIr::default(),
             include_tests: false,
             time_phases: false,
+            profile_phases: false,
             metrics_outfile: None,
             optimization_level: OptLevel::Opt0,
             experimental: ExperimentalFlags {
@@ -284,6 +286,13 @@ impl BuildConfig {
     pub fn with_time_phases(self, a: bool) -> Self {
         Self {
             time_phases: a,
+            ..self
+        }
+    }
+
+    pub fn with_profile_phases(self, a: bool) -> Self {
+        Self {
+            profile_phases: a,
             ..self
         }
     }

@@ -31,6 +31,7 @@ fn opts_from_cmd(cmd: BuildCommand) -> pkg::BuildOpts {
             reverse_order: cmd.build.print.reverse_order,
         },
         time_phases: cmd.build.print.time_phases,
+        profile_phases: cmd.build.print.profile_phases,
         metrics_outfile: cmd.build.print.metrics_outfile,
         minify: pkg::MinifyOpts {
             json_abi: cmd.build.minify.json_abi,

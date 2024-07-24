@@ -2173,6 +2173,7 @@ dependencies = [
  "serde_ignored",
  "serde_json",
  "serde_with",
+ "subprocess-profiler-types",
  "sway-core",
  "sway-error",
  "sway-types",
@@ -6531,6 +6532,11 @@ dependencies = [
  "rustversion",
  "syn 2.0.71",
 ]
+
+[[package]]
+name = "subprocess-profiler-types"
+version = "0.1.0"
+source = "git+https://github.com/ourovoros-io/subprocess-profiler.git?rev=a7d8a04#a7d8a04566e362d7b786e29733192da515cd9db6"
 
 [[package]]
 name = "substrate-bn"

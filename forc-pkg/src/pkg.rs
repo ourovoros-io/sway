@@ -1944,6 +1944,12 @@ pub fn compile(
     }
 
     metrics.bytecode_size = compiled.bytecode.len();
+    
+    #[cfg(feature = "profile")]
+    if sway_build_config.profile_phases {
+        println!("/forc-perf size {}", compiled.bytecode.len());
+    }
+    
     let bytecode = BuiltPackageBytecode {
         bytes: compiled.bytecode,
         entries,

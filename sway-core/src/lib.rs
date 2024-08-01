@@ -717,6 +717,7 @@ pub fn compile_to_ast(
 
     // Parse the program to a concrete syntax tree (CST).
     let parse_program_opt = time_expr!(
+        package_name,
         "parse the program to a concrete syntax tree (CST)",
         "parse_cst",
         parse(input, handler, engines, build_config),
@@ -741,6 +742,7 @@ pub fn compile_to_ast(
 
     // Type check (+ other static analysis) the CST to a typed AST.
     let typed_res = time_expr!(
+        package_name,
         "parse the concrete syntax tree (CST) to a typed AST",
         "parse_ast",
         parsed_to_ast(

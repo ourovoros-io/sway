@@ -17,69 +17,16 @@ pub struct PerformanceData {
 #[macro_export]
 // Time the given expression and print/save the result.
 macro_rules! time_expr {
-    ($description:expr, $key:expr, $expression:expr, $build_config:expr, $data:expr) => {{
+    ($pkg_name:expr, $description:expr, $key:expr, $expression:expr, $build_config:expr, $data:expr) => {{
         use std::io::{BufRead, Read, Write};
         #[cfg(feature = "profile")]
         if let Some(cfg) = $build_config {
             if cfg.profile_phases {
-                let profiler_path = "TODO: Replace the with the proper path here";
-
-                let mut command = std::process::Command::new(profiler_path)
-                    .arg(std::process::id().to_string())
-                    .stdin(std::process::Stdio::piped())
-                    .stdout(std::process::Stdio::piped())
-                    .spawn().unwrap();
-
-                let mut stdout = std::io::BufReader::new(command.stdout.take().unwrap());
-
-                let mut command_output = String::new();
-                stdout.read_line(&mut command_output).unwrap();
-                command_output = command_output.trim_end().into();
-
-                assert!(command_output.is_empty(), "Expected empty command output line, got: \"{command_output}\"; Decide how to handle this");
-
-                let start_time = std::time::Instant::now();
+                println!("/forc-perf start {} {}", $pkg_name, $description);
 
                 let output = { $expression };
 
-                let elapsed = start_time.elapsed();
-
-                println!("  Time elapsed to {}: {:?}", $description, elapsed);
-
-                let mut stdin = command.stdin.take().unwrap();
-                writeln!(stdin).unwrap();
-                drop(stdin);
-
-                assert!(command.wait().unwrap().success(), "Command failed, decide how to handle that here");
-
-                let mut command_output = vec![];
-                stdout.read_to_end(&mut command_output).unwrap();
-
-                const HEADER_SIZE: usize = std::mem::size_of::<subprocess_profiler_types::Header>();
-
-                let header = unsafe {
-                    &*(command_output[..HEADER_SIZE].as_ptr() as *const subprocess_profiler_types::Header)
-                };
-
-                let frames_size = header.frame_count as usize * std::mem::size_of::<subprocess_profiler_types::Frame>();
-
-                let frames = unsafe {
-                    std::slice::from_raw_parts(
-                        command_output[HEADER_SIZE..HEADER_SIZE + frames_size].as_ptr() as *const subprocess_profiler_types::Frame,
-                        header.frame_count as _,
-                    )
-                };
-
-                let cpu_usage_frames = unsafe {
-                    std::slice::from_raw_parts(
-                        command_output[HEADER_SIZE + frames_size..].as_ptr() as *const subprocess_profiler_types::CpuUsage,
-                        header.cpu_usage_count as _,
-                    )
-                };
-
-                println!("  Frames : {:?}", frames);
-                println!("  CPU usage frames: {:?}", cpu_usage_frames);
-
+                println!("/forc-perf stop {} {}", $pkg_name, $description);
 
                 output
             } else {

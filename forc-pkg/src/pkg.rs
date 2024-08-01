@@ -1790,6 +1790,7 @@ pub fn compile(
 
     // First, compile to an AST. We'll update the namespace and check for JSON ABI output.
     let ast_res = time_expr!(
+        pkg.name,
         "compile to ast",
         "compile_to_ast",
         sway_core::compile_to_ast(
@@ -1828,6 +1829,7 @@ pub fn compile(
     }
 
     let asm_res = time_expr!(
+        pkg.name,
         "compile ast to asm",
         "compile_ast_to_asm",
         sway_core::ast_to_asm(&handler, engines, &programs, &sway_build_config),
@@ -1841,6 +1843,7 @@ pub fn compile(
         BuildTarget::Fuel => {
             let mut types = vec![];
             ProgramABI::Fuel(time_expr!(
+                pkg.name,
                 "generate JSON ABI program",
                 "generate_json_abi",
                 fuel_abi::generate_program_abi(
@@ -1871,6 +1874,7 @@ pub fn compile(
             };
 
             let abi = time_expr!(
+                pkg.name,
                 "generate JSON ABI program",
                 "generate_json_abi",
                 evm_abi::generate_abi_program(typed_program, engines),
@@ -1901,6 +1905,7 @@ pub fn compile(
     };
 
     let bc_res = time_expr!(
+        pkg.name,
         "compile asm to bytecode",
         "compile_asm_to_bytecode",
         sway_core::asm_to_bytecode(&handler, asm, source_map, engines.se(), &sway_build_config),

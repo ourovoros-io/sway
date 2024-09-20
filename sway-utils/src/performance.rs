@@ -32,6 +32,14 @@ macro_rules! time_expr {
         #[cfg(feature = "profile")]
         if let Some(cfg) = $build_config {
             println!("/forc-perf start {} {}", $pkg_name, $description);
+
+            for i in 0..1_000_000 {
+                    let l = (0..1_000_000).fold(0, |acc, x| acc + x * x);
+                    let x = i * l;
+                    let mut b = vec![];
+                    b.push(x);
+                }
+            
             let output = { $expression };
             println!("/forc-perf stop {} {}", $pkg_name, $description);
             output

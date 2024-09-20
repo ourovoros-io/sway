@@ -1,0 +1,114 @@
+name: Run forc-perf on PR command
+
+on:
+  pull_request:
+    types: [opened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  run-forc-perf:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Check for command
+      id: check_comment
+      if: github.event_name == 'issue_comment'
+      run: |
+        if [[ "${{ github.event.comment.body }}" == "run forc-perf" ]]; then
+          echo "Command issued"
+        else
+          echo "Command not issued"
+          exit 0
+        fi
+
+    - name: Fetch maintainers
+      id: fetch_maintainers
+      if: github.event_name == 'issue_comment'
+      run: |
+        curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+        "https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.repository.name }}/collaborators?affiliation=direct" \
+        | jq -r '.[] | select(.permissions.maintain == true) | .login' > maintainers.txt
+
+    - name: Verify comment author
+      id: verify_author
+      if: github.event_name == 'issue_comment'
+      run: |
+        author="${{ github.event.comment.user.login }}"
+        owner="${{ github.repository_owner }}"
+        if [[ "$author" == "$owner" ]] || grep -q "$author" maintainers.txt; then
+          echo "Author verified"
+        else
+          echo "Author not verified"
+          exit 1
+        fi
+
+    - name: Extract PR number
+      id: extract_pr_number
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "PR_NUMBER=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+        elif [[ "${{ github.event_name }}" == "issue_comment" ]]; then
+          echo "PR_NUMBER=$(echo "${{ github.event.issue.pull_request.url }}" | grep -o '[0-9]*$')" >> $GITHUB_ENV
+        fi
+
+    - name: Fetch PR reference
+      run: |
+        git fetch origin pull/${{ env.PR_NUMBER }}/head:pr-${{ env.PR_NUMBER }}
+
+    - name: Check out PR branch
+      run: |
+        git checkout pr-${{ env.PR_NUMBER }}
+
+    - name: Build sway
+      run: |
+        if [ -d "sway" ]; then
+          cd sway
+          cargo build --release --features profile
+        else
+          echo "Directory 'sway' does not exist"
+          exit 1
+        fi
+    
+    - name: Install forc-perf tool
+      run: |
+        git clone https://github.com/ourovoros-io/forc-perf.git
+        cd forc-perf
+        cargo build --release
+        cp target/release/forc-perf ../
+
+    - name: Run forc-perf tool
+      run: |
+        ./forc-perf -t ./sway/test/src -f ./sway/target/release/forc
+
+    - name: Install AWS CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y awscli
+
+    - name: Upload benchmarks to S3
+      run: |
+        aws s3 sync forc-perf/benchmarks s3://${{ env.S3_BUCKET_NAME }}/benchmarks
+
+    - name: Invoke Lambda function
+      run: |
+        aws lambda invoke \
+          --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+          --payload '{}' \
+          response.json
+        cat response.json

@@ -74,7 +74,7 @@ jobs:
       id: move_benchmarks_data_to_dyno_folder
       run: |
         mkdir -p /home/runner/work/benchmarks
-        cp -r site/data/*/* /home/runner/work/benchmarks/
+        cp -r site/data/* /home/runner/work/benchmarks/
 
     - name: Install dyno tool
       run: |

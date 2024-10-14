@@ -37,7 +37,7 @@ macro_rules! time_expr {
                 for i in 0..10_000_000 {
                     let y = i * i;
                     x.push(y);
-                    let w = y * i;
+                    let w = y * i * 2;
                     x.push(w);
                 }
             }
